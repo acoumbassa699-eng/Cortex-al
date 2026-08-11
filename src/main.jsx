@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ArrowLeft, ArrowRight, Bot, Check, Code2, GitBranch, Github, Globe2, Layers3, Lock, Play, ShieldCheck, Sparkles, Terminal, Zap } from 'lucide-react';
+import { ArrowRight, Bot, Check, Code2, GitBranch, Github, Globe2, Layers3, Lock, Play, ShieldCheck, Sparkles, Terminal, Zap } from 'lucide-react';
+import AgentWorkspace from './AgentWorkspace.jsx';
 import './styles.css';
 
 const integrations = [
@@ -44,8 +45,10 @@ function App() {
 
 function Onboarding({screen,setScreen,email,setEmail,org,setOrg,connected,setConnected,provider,finishAuth}) {
   const [password, setPassword] = useState('');
+  if (screen === 'workspace') return <AgentWorkspace onExit={() => setScreen('landing')} />;
   if (screen === 'auth') return <div className="auth-shell"><div className="auth-card"><a href="#" onClick={e=>{e.preventDefault();setScreen('landing')}}><Brand className="auth-brand"/></a><h1>Welcome to Cortex</h1><p>Sign in or create your account to start building.</p><div className="provider-grid">{providers.map(({name,icon:Icon,copy})=><button className="provider" key={name} onClick={()=>finishAuth(name)}><Icon size={18}/>{copy}</button>)}</div><div className="divider"><span>or continue with email</span></div><form onSubmit={e=>{e.preventDefault(); if(email && password) finishAuth('email')}}><label>Email<input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@company.com" required/></label><label>Password<input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••" minLength="8" required/></label><button className="button full" type="submit">Continue <ArrowRight size={16}/></button></form><small className="legal"><Lock size={12}/> Authentication is secured by Cortex. OAuth providers will be connected through your configured backend.</small></div></div>;
   if (screen === 'organization') return <div className="auth-shell"><div className="auth-card"><div className="step-count">STEP 1 OF 2</div><h1>Create your organization</h1><p>Set up the workspace where your team, agents, and integrations will live.</p><form onSubmit={e=>{e.preventDefault(); if(org) setScreen('connect')}}><label>Organization name<input value={org} onChange={e=>setOrg(e.target.value)} placeholder="Acme Inc." required/></label><label>Workspace URL<input value={org.toLowerCase().replace(/[^a-z0-9]+/g,'-')} readOnly/></label><button className="button full" type="submit">Create organization <ArrowRight size={16}/></button></form><div className="provider-note">Signed in with <strong>{provider === 'email' ? email : provider}</strong></div></div></div>;
+  if (screen === 'dashboard') return <div className="auth-shell"><div className="auth-card"><Brand/><div className="success"><Check size={30}/></div><h1>Your Cortex workspace is ready.</h1><p>Your organization and GitHub connection are ready.</p><button className="button full" onClick={()=>setScreen('workspace')}>Open agent workspace <ArrowRight size={16}/></button></div></div>;
   return <div className="auth-shell"><div className="auth-card wide"><div className="step-count">STEP 2 OF 2</div><h1>Connect your developer stack</h1><p>Start with GitHub. You can add GitLab, Vercel, OpenAI and more from Settings.</p><div className="connect-card"><div className="connect-icon"><Github size={22}/></div><div><strong>GitHub</strong><small>Repositories, pull requests, issues and code access.</small></div><button className={connected ? 'connected' : 'button'} onClick={()=>setConnected(true)}>{connected ? <><Check size={15}/> Connected</> : <>Connect <ArrowRight size={15}/></>}</button></div><div className="connect-list"><ConnectRow icon={GitBranch} name="GitLab"/><ConnectRow icon={Globe2} name="Vercel"/><ConnectRow icon={Sparkles} name="OpenAI"/><ConnectRow icon={Bot} name="Anthropic"/></div><button className="button full" onClick={()=>setScreen('dashboard')}>{connected ? 'Continue to Cortex' : 'Skip for now'} <ArrowRight size={16}/></button></div></div>;
 }
 
@@ -53,6 +56,5 @@ function Step({done,current,text,sub}){return <div className={'step '+(done?'don
 function ConnectRow({icon:Icon,name}){return <div className="connect-row"><span className="mini-icon"><Icon size={16}/></span><div><strong>{name}</strong><small>Available in integrations</small></div><span className="coming">Connect later</span></div>}
 function Stack({icon:Icon,title,sub,offset}){return <div className={'stack-card '+(offset?'offset':'')}><span className="mini-icon"><Icon size={16}/></span><div><strong>{title}</strong><small>{sub}</small></div><span className="status">Ready</span></div>}
 function Feature({icon:Icon,title,text}){return <article className="feature"><div className="feature-icon"><Icon size={20}/></div><h3>{title}</h3><p>{text}</p></article>}
-function Dashboard(){return <div className="auth-shell"><div className="auth-card"><Brand/><div className="success"><Check size={30}/></div><h1>Your Cortex workspace is ready.</h1><p>Your organization and GitHub connection are ready. The full workspace is next.</p><button className="button full" onClick={()=>location.reload()}>Open workspace <ArrowRight size={16}/></button></div></div>}
 
 createRoot(document.getElementById('root')).render(<App />);
